@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 确保页面在手机等移动设备上正常显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siyu的待办清单</title>
+    <style>
+        /* 三丽鸥可爱风格配色 */
+        :root {
+            --primary-color: #ffb7c5; /* 樱花粉 */
+            --secondary-color: #98d8eb; /* 天空蓝 */
+            --bg-color: #fff5f7;     /* 浅粉底色 */
+            --text-color: #5d5d5d;   /* 柔和深灰 */
+            --white: #ffffff;
+            --danger-color: #ff9aa2; /* 柔粉红 */
+            --success-color: #b5ead7; /* 奶油绿 */
+            --border-radius: 20px;   /* 更圆润的角 */
+        }
+
+        /* 基础页面设置 */
+        body {
+            font-family: 'Comic Sans MS', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', cursive, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(#ffdae0 10%, transparent 10%),
+                radial-gradient(#ffdae0 10%, transparent 10%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 容器样式：圆嘟嘟的白框 */
+        .container {
+            background-color: var(--white);
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 0px #ffdae0; /* 可爱的厚度感阴影 */
+            border: 4px solid #ffdae0;
+            position: relative;
+        }
+
+        /* 装饰小耳朵/小蝴蝶结的模拟 */
+        .container::before {
+            content: '🎀';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+        }
+
+        /* 标题样式：可爱的大字体 */
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 35px;
+            color: #ff8fa3;
+            text-shadow: 2px 2px 0px #fff1f3;
+            letter-spacing: 2px;
+        }
+
+        /* 输入区域布局 */
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* 输入框样式：像棉花糖一样 */
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            border: 3px solid #ffe3e8;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background-color: #fff9fa;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255, 183, 197, 0.5);
+        }
+
+        /* 添加按钮样式：圆滚滚的 */
+        .add-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0px #ff9dae;
+        }
+
+        .add-btn:hover {
+            background-color: #ff9dae;
+            transform: translateY(2px);
+            box-shadow: 0 3px 0px #ff8fa3;
+        }
+
+        .add-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px #ff8fa3;
+        }
+
+        /* 任务列表容器 */
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* 单个任务条目样式：像小饼干一样 */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 18px;
+            background-color: #fffcfd;
+            border: 2px solid #fff0f3;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .todo-item:hover {
+            transform: scale(1.02);
+            border-color: #ffe3e8;
+        }
+
+        /* 任务文字内容 */
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+            color: #7d7d7d;
+            font-weight: 500;
+        }
+
+        /* 已完成任务的文字样式 */
+        .todo-item.completed {
+            background-color: #f8f8f8;
+            opacity: 0.8;
+        }
+        
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #d1d1d1;
+        }
+
+        /* 按钮组 */
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 操作按钮的基础样式 */
+        .action-btn {
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* 完成按钮：清新绿 */
+        .complete-btn {
+            background-color: var(--success-color);
+            color: #5a7d6e;
+        }
+
+        /* 删除按钮：柔粉红 */
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .action-btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-2px);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 400px) {
+            .container {
+                padding: 30px 20px;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+            .add-btn {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Siyu的待办清单</h1>
+
+        <!-- 任务输入区域 -->
+        <div class="input-group">
+            <input type="text" id="todo-input" placeholder="写下你的小愿望吧~">
+            <button class="add-btn" id="add-button">添加</button>
+        </div>
+
+        <!-- 任务展示区域 -->
+        <ul class="todo-list" id="todo-list">
+            <!-- 任务将由 JavaScript 动态生成 -->
+        </ul>
+    </div>
+
+    <script>
+        // 1. 获取页面上的重要元素
+        const todoInput = document.getElementById('todo-input');   // 输入框
+        const addButton = document.getElementById('add-button'); // 添加按钮
+        const todoList = document.getElementById('todo-list');     // 任务列表容器
+
+        /**
+         * 功能：将当前的待办清单保存到浏览器的 localStorage 中
+         */
+        function saveTasks() {
+            const tasks = [];
+            const todoItems = todoList.querySelectorAll('.todo-item');
+            
+            todoItems.forEach(item => {
+                const text = item.querySelector('.todo-text').textContent;
+                const completed = item.classList.contains('completed');
+                tasks.push({ text: text, completed: completed });
+            });
+
+            localStorage.setItem('todoList', JSON.stringify(tasks));
+        }
+
+        /**
+         * 功能：从 localStorage 读取已保存的任务并渲染到页面上
+         */
+        function loadTasks() {
+            const savedData = localStorage.getItem('todoList');
+            
+            if (savedData) {
+                const tasks = JSON.parse(savedData);
+                tasks.forEach(task => {
+                    createTodoItem(task.text, task.completed);
+                });
+            }
+        }
+
+        /**
+         * 功能：创建一个任务条目并添加到页面
+         */
+        function createTodoItem(text, isCompleted = false) {
+            const listItem = document.createElement('li');
+            listItem.className = 'todo-item';
+            if (isCompleted) {
+                listItem.classList.add('completed');
+            }
+
+            listItem.innerHTML = `
+                <span class="todo-text">${text}</span>
+                <div class="actions">
+                    <button class="action-btn complete-btn">${isCompleted ? '撤回' : '完成'}</button>
+                    <button class="action-btn delete-btn">丢掉</button>
+                </div>
+            `;
+
+            const completeBtn = listItem.querySelector('.complete-btn');
+            const deleteBtn = listItem.querySelector('.delete-btn');
+
+            completeBtn.addEventListener('click', function() {
+                listItem.classList.toggle('completed');
+                completeBtn.textContent = listItem.classList.contains('completed') ? '撤回' : '完成';
+                saveTasks();
+            });
+
+            deleteBtn.addEventListener('click', function() {
+                listItem.remove();
+                saveTasks();
+            });
+
+            todoList.appendChild(listItem);
+        }
+
+        /**
+         * 功能：处理添加新任务的动作
+         */
+        function addTask() {
+            const taskText = todoInput.value.trim();
+
+            if (taskText === "") {
+                alert("记得写内容哦，亲爱哒！");
+                return;
+            }
+
+            createTodoItem(taskText);
+            saveTasks();
+            todoInput.value = "";
+            todoInput.focus();
+        }
+
+        addButton.addEventListener('click', addTask);
+        todoInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // 页面初始化时，读取已保存的任务
+        loadTasks();
+    </script>
+
+</body>
+</html>
